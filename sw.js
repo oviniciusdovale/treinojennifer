@@ -1,5 +1,5 @@
 // Bump a versão a cada deploy para invalidar o cache antigo.
-var CACHE = "treino-v7";
+var CACHE = "treino-v8";
 
 var SHELL = [
   "./",
@@ -17,7 +17,15 @@ var SHELL = [
 self.addEventListener("install", function (evento) {
   evento.waitUntil(
     caches.open(CACHE).then(function (cache) {
-      return cache.addAll(SHELL);
+      // cache: "reload" obriga cada arquivo a vir da rede. Sem isso o GitHub
+      // Pages responde do cache HTTP do navegador (dez minutos) e uma versao
+      // nova do app so chegaria no celular dela depois desse tempo.
+      return Promise.all(SHELL.map(function (caminho) {
+        return fetch(new Request(caminho, { cache: "reload" })).then(function (resposta) {
+          if (!resposta.ok) throw new Error("falhou ao baixar " + caminho);
+          return cache.put(caminho, resposta);
+        });
+      }));
     }).then(function () {
       return self.skipWaiting();
     })
