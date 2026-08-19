@@ -1,5 +1,5 @@
 // Bump a versão a cada deploy para invalidar o cache antigo.
-var CACHE = "treino-v1";
+var CACHE = "treino-v6";
 
 var SHELL = [
   "./",

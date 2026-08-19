@@ -1,8 +1,9 @@
 # Treino da Jennifer
 
 App de treino instalável na tela inicial do celular (PWA). Dois planos de treino com
-três divisões cada, marcação de exercícios, progresso do dia e histórico semanal
-automático. Tudo salvo no próprio aparelho — sem login, sem servidor, funciona offline.
+três divisões cada, marcação de exercícios, registro da carga usada, progresso do dia e
+histórico semanal automático. Tudo salvo no próprio aparelho — sem login, sem servidor,
+funciona offline.
 
 ## Estrutura
 
@@ -53,6 +54,20 @@ Sem isso o celular continua servindo a versão antiga do cache.
 
 O app passa a abrir em tela cheia, sem barra de endereço.
 
+## Carga
+
+Cada exercício que admite peso tem um campo de carga, e ao lado dele aparece
+`anterior: 80 kg` — o peso que ela usou da última vez naquele exercício, tirado do
+próprio histórico. Serve para ela decidir se repete ou sobe a carga.
+
+Quem controla isso é a flag `carga: true` em `data.js`. Os exercícios sem a flag são de
+peso corporal e não mostram campo: dead bug (nos dois planos), prancha lateral
+modificada e bird dog.
+
+O campo aceita vírgula (`32,5`) e é salvo a cada tecla. Se o treino do dia já foi
+registrado, alterar a carga atualiza o registro. Na tela de histórico, tocar num treino
+abre a lista de exercícios com as cargas daquele dia.
+
 ## Como funciona o histórico
 
 O treino entra no histórico de duas formas:
@@ -72,6 +87,7 @@ No `localStorage` do próprio navegador/app:
 | Chave | Conteúdo |
 |---|---|
 | `tj.marcados.<data>.<plano>.<treino>` | exercícios marcados naquele dia |
+| `tj.cargas.<data>.<plano>.<treino>` | cargas digitadas naquele dia |
 | `tj.historico` | lista de treinos concluídos |
 | `tj.ultimoPlano` / `tj.ultimoTreino` | onde ela parou |
 

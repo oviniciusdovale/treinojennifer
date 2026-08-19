@@ -142,19 +142,28 @@ h1 {
 
 /* Cards de exercício */
 .exercicio {
+  border-radius: 12px;
+  border: 1px solid var(--borda);
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.exercicio-toque {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 12px;
-  border-radius: 12px;
-  border: 1px solid var(--borda);
-  margin-bottom: 8px;
   background: transparent;
+  border: none;
   width: 100%;
   font-family: inherit;
   text-align: left;
   color: inherit;
 }
+
+/* Sem a linha de carga o card mantem o respiro do prototipo original;
+   com ela, o padding de baixo passa para a propria linha de carga. */
+.exercicio:has(.ex-carga) .exercicio-toque { padding-bottom: 6px; }
 
 .exercicio.feito { background: var(--card-feito); }
 
@@ -186,6 +195,47 @@ h1 {
 
 .ex-series { font-size: 13px; font-weight: 600; color: var(--dourado); }
 .exercicio.feito .ex-series { color: var(--apagado); }
+
+.ex-carga {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 0 12px 10px 48px;
+}
+
+.ex-carga-anterior {
+  flex: 1;
+  font-size: 12px;
+  color: #7C9384;
+}
+
+.ex-carga-campo {
+  width: 72px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--borda-forte);
+  background: #1A2B22;
+  color: var(--texto);
+  font-family: inherit;
+  font-size: 15px;
+  text-align: right;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.ex-carga-campo:focus {
+  outline: none;
+  border-color: var(--dourado);
+}
+
+.ex-carga-campo::placeholder { color: #5F7566; }
+
+.ex-carga-unidade {
+  font-size: 13px;
+  color: var(--secundario);
+  width: 18px;
+}
 
 /* Ações */
 .acoes {
@@ -254,14 +304,17 @@ h1 {
 .semana-rotulo { font-size: 14px; font-weight: 500; text-align: center; flex: 1; }
 
 .dia {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
   padding: 12px;
   border-radius: 12px;
   border: 1px solid var(--borda);
   margin-bottom: 8px;
+}
+
+.dia-linha {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
 }
 
 .dia.com-treino { background: var(--card-feito); }
@@ -272,8 +325,49 @@ h1 {
 
 .dia-treinos { font-size: 13px; color: var(--secundario); text-align: right; }
 .dia-treinos.vazio { color: #5F7566; }
-.dia-treino-linha + .dia-treino-linha { margin-top: 4px; }
 .dia-treino-parcial { color: #7C9384; font-size: 12px; }
+
+.dia-treino-linha {
+  display: block;
+  margin-left: auto;
+  padding: 2px 0;
+  background: none;
+  border: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: 13px;
+  text-align: right;
+}
+
+.dia-treino-linha::after {
+  content: "\203A";
+  color: var(--secundario);
+  display: inline-block;
+  margin-left: 8px;
+  transition: transform 0.15s ease;
+}
+
+.dia-treino-linha.aberto::after { transform: rotate(90deg); }
+
+.dia-detalhe {
+  list-style: none;
+  margin: 10px 0 2px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #1A2B22;
+  text-align: left;
+}
+
+.dia-detalhe li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--secundario);
+  padding: 3px 0;
+}
+
+.dia-detalhe-carga { color: var(--dourado); font-weight: 600; flex-shrink: 0; }
 
 .total-semana {
   font-size: 14px;

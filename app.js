@@ -4,7 +4,10 @@
   var DIAS_ARMAZENAMENTO = ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"];
   var DIAS_EXIBICAO = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
 
+  var SEPARADOR = "  \u00b7  ";
+
   var K_MARCADOS = "tj.marcados";
+  var K_CARGAS = "tj.cargas";
   var K_HISTORICO = "tj.historico";
   var K_ULTIMO_PLANO = "tj.ultimoPlano";
   var K_ULTIMO_TREINO = "tj.ultimoTreino";
@@ -66,6 +69,39 @@
     gravar(chaveMarcados(data, planoId, treinoKey), marcados);
   }
 
+  function chaveCargas(data, planoId, treinoKey) {
+    return K_CARGAS + "." + data + "." + planoId + "." + treinoKey;
+  }
+
+  function getCargas(data, planoId, treinoKey) {
+    return ler(chaveCargas(data, planoId, treinoKey), {});
+  }
+
+  function setCargas(data, planoId, treinoKey, cargas) {
+    gravar(chaveCargas(data, planoId, treinoKey), cargas);
+  }
+
+  // A referência de carga sai do próprio histórico: o treino mais recente antes
+  // de hoje em que ela anotou peso nesse exercício.
+  function cargaAnterior(exId) {
+    var achado = null;
+    getHistorico().forEach(function (r) {
+      if (r.data >= hoje || !r.cargas || !r.cargas[exId]) return;
+      if (!achado || r.data > achado.data) achado = r;
+    });
+    return achado ? achado.cargas[exId] : null;
+  }
+
+  function exercicioPorId(id) {
+    for (var i = 0; i < PLANOS.length; i++) {
+      for (var j = 0; j < PLANOS[i].treinos.length; j++) {
+        var exs = PLANOS[i].treinos[j].exercicios;
+        for (var k = 0; k < exs.length; k++) if (exs[k].id === id) return exs[k];
+      }
+    }
+    return null;
+  }
+
   function getHistorico() {
     var h = ler(K_HISTORICO, []);
     return Array.isArray(h) ? h : [];
@@ -80,7 +116,7 @@
   }
 
   // Um registro por (data, plano, treino): refinalizar atualiza em vez de duplicar.
-  function registrarTreino(data, plano, treino, marcadosIds) {
+  function registrarTreino(data, plano, treino, marcadosIds, cargas) {
     var historico = getHistorico();
     var registro = {
       data: data,
@@ -89,7 +125,8 @@
       planoId: plano.id,
       treino: treino.key,
       treinoLabel: treino.label,
-      exerciciosMarcados: marcadosIds
+      exerciciosMarcados: marcadosIds,
+      cargas: cargas || {}
     };
     var i = acharRegistro(historico, data, plano.id, treino.key);
     if (i >= 0) historico[i] = registro;
@@ -125,6 +162,17 @@
   var el = function (id) { return document.getElementById(id); };
 
   // ------------------------------------------------------------ tela: treino
+  // So o que ela realmente preencheu; campo vazio nao vira registro.
+  function cargasPreenchidas() {
+    var cargas = getCargas(hoje, planoAtual.id, treinoAtual.key);
+    var limpo = {};
+    treinoAtual.exercicios.forEach(function (ex) {
+      var valor = (cargas[ex.id] || "").trim();
+      if (valor) limpo[ex.id] = valor;
+    });
+    return limpo;
+  }
+
   function idsMarcados() {
     var marcados = getMarcados(hoje, planoAtual.id, treinoAtual.key);
     return treinoAtual.exercicios
@@ -186,9 +234,15 @@
   }
 
   function criarCardExercicio(ex, feito) {
-    var card = document.createElement("button");
+    var card = document.createElement("div");
     card.className = "exercicio" + (feito ? " feito" : "");
-    card.setAttribute("aria-pressed", feito ? "true" : "false");
+
+    // O toque que marca o exercicio fica num botao proprio: o campo de carga
+    // precisa ficar fora dele, porque <input> dentro de <button> e invalido e
+    // no Safari do iPhone digitar o peso acabaria marcando o exercicio.
+    var toque = document.createElement("button");
+    toque.className = "exercicio-toque";
+    toque.setAttribute("aria-pressed", feito ? "true" : "false");
 
     var caixa = document.createElement("div");
     caixa.className = "checkbox";
@@ -201,7 +255,7 @@
 
     var nome = document.createElement("div");
     nome.className = "ex-nome";
-    nome.appendChild(document.createTextNode(ex.nome + "  ·  "));
+    nome.appendChild(document.createTextNode(ex.nome + SEPARADOR));
     var series = document.createElement("span");
     series.className = "ex-series";
     series.textContent = ex.series;
@@ -215,10 +269,10 @@
       texto.appendChild(alt);
     }
 
-    card.appendChild(caixa);
-    card.appendChild(texto);
+    toque.appendChild(caixa);
+    toque.appendChild(texto);
 
-    card.onclick = function () {
+    toque.onclick = function () {
       var marcados = getMarcados(hoje, planoAtual.id, treinoAtual.key);
       marcados[ex.id] = !marcados[ex.id];
       setMarcados(hoje, planoAtual.id, treinoAtual.key, marcados);
@@ -226,13 +280,60 @@
       // Marcou todos: registra sozinha, sem ela precisar tocar em nada.
       var feitos = idsMarcados();
       if (feitos.length === treinoAtual.exercicios.length) {
-        registrarTreino(hoje, planoAtual, treinoAtual, feitos);
+        registrarTreino(hoje, planoAtual, treinoAtual, feitos, cargasPreenchidas());
       }
       cancelarConfirmacao();
       renderTreino();
     };
 
+    card.appendChild(toque);
+    if (ex.carga) card.appendChild(criarCampoCarga(ex));
+
     return card;
+  }
+
+  function criarCampoCarga(ex) {
+    var linha = document.createElement("div");
+    linha.className = "ex-carga";
+
+    var anterior = document.createElement("span");
+    anterior.className = "ex-carga-anterior";
+    var ultima = cargaAnterior(ex.id);
+    anterior.textContent = ultima ? "anterior: " + ultima + " kg" : "";
+    linha.appendChild(anterior);
+
+    var campo = document.createElement("input");
+    campo.className = "ex-carga-campo";
+    campo.type = "text";
+    campo.inputMode = "decimal";
+    campo.autocomplete = "off";
+    campo.placeholder = "peso";
+    campo.maxLength = 6;
+    campo.setAttribute("aria-label", "Carga em quilos para " + ex.nome);
+    campo.value = getCargas(hoje, planoAtual.id, treinoAtual.key)[ex.id] || "";
+
+    // Salva a cada tecla sem redesenhar a tela, senao o campo perderia o foco.
+    campo.oninput = function () {
+      var limpo = campo.value.replace(/[^0-9.,]/g, "");
+      if (limpo !== campo.value) campo.value = limpo;
+      var cargas = getCargas(hoje, planoAtual.id, treinoAtual.key);
+      if (limpo.trim()) cargas[ex.id] = limpo.trim();
+      else delete cargas[ex.id];
+      setCargas(hoje, planoAtual.id, treinoAtual.key, cargas);
+
+      // Se o treino de hoje ja foi registrado, a carga nova entra no registro.
+      if (acharRegistro(getHistorico(), hoje, planoAtual.id, treinoAtual.key) >= 0) {
+        registrarTreino(hoje, planoAtual, treinoAtual, idsMarcados(), cargasPreenchidas());
+      }
+    };
+
+    var unidade = document.createElement("span");
+    unidade.className = "ex-carga-unidade";
+    unidade.textContent = "kg";
+
+    linha.appendChild(campo);
+    linha.appendChild(unidade);
+    return linha;
   }
 
   function renderTreino() {
@@ -296,21 +397,29 @@
         (doDia.length ? " com-treino" : "") +
         (dataStr === hoje ? " hoje" : "");
 
+      // Cabecalho em linha (dia + treinos); os detalhes entram abaixo dele,
+      // ocupando a largura inteira do card em vez de espremer na direita.
+      var cabecalho = document.createElement("div");
+      cabecalho.className = "dia-linha";
+
       var nome = document.createElement("span");
       nome.className = "dia-nome";
       nome.textContent = DIAS_EXIBICAO[dia.getDay()];
-      linha.appendChild(nome);
+      cabecalho.appendChild(nome);
 
       var treinos = document.createElement("span");
       treinos.className = "dia-treinos" + (doDia.length ? "" : " vazio");
+      cabecalho.appendChild(treinos);
+      linha.appendChild(cabecalho);
 
       if (!doDia.length) {
         treinos.textContent = "(sem treino)";
       } else {
         doDia.forEach(function (r) {
-          var item = document.createElement("div");
+          var item = document.createElement("button");
           item.className = "dia-treino-linha";
-          item.textContent = r.plano + ", " + (r.treinoLabel || "Treino " + r.treino);
+          item.appendChild(document.createTextNode(
+            r.plano + ", " + (r.treinoLabel || "Treino " + r.treino)));
 
           var totalEx = totalExerciciosDe(r);
           var feitos = (r.exerciciosMarcados || []).length;
@@ -320,17 +429,54 @@
             parcial.textContent = " (" + feitos + "/" + totalEx + ")";
             item.appendChild(parcial);
           }
+
+          var detalhe = criarDetalheTreino(r);
+          item.setAttribute("aria-expanded", "false");
+          item.onclick = function () {
+            var abrindo = detalhe.hidden;
+            detalhe.hidden = !abrindo;
+            item.setAttribute("aria-expanded", abrindo ? "true" : "false");
+            item.classList.toggle("aberto", abrindo);
+          };
+
           treinos.appendChild(item);
+          linha.appendChild(detalhe);
         });
       }
 
-      linha.appendChild(treinos);
       lista.appendChild(linha);
     }
 
     if (totalTreinos === 0) el("total-semana").textContent = "Nenhum treino nesta semana";
     else if (totalTreinos === 1) el("total-semana").textContent = "Total da semana: 1 treino";
     else el("total-semana").textContent = "Total da semana: " + totalTreinos + " treinos";
+  }
+
+  function criarDetalheTreino(registro) {
+    var lista = document.createElement("ul");
+    lista.className = "dia-detalhe";
+    lista.hidden = true;
+
+    (registro.exerciciosMarcados || []).forEach(function (id) {
+      var ex = exercicioPorId(id);
+      var carga = registro.cargas && registro.cargas[id];
+      var li = document.createElement("li");
+      li.appendChild(document.createTextNode(ex ? ex.nome : id));
+      if (carga) {
+        var peso = document.createElement("span");
+        peso.className = "dia-detalhe-carga";
+        peso.textContent = carga + " kg";
+        li.appendChild(peso);
+      }
+      lista.appendChild(li);
+    });
+
+    if (!lista.childNodes.length) {
+      var vazio = document.createElement("li");
+      vazio.textContent = "nenhum exercicio marcado";
+      lista.appendChild(vazio);
+    }
+    return lista;
   }
 
   function totalExerciciosDe(registro) {
@@ -356,7 +502,7 @@
   el("btn-finalizar").onclick = function () {
     var feitos = idsMarcados();
     if (!feitos.length) return;
-    registrarTreino(hoje, planoAtual, treinoAtual, feitos);
+    registrarTreino(hoje, planoAtual, treinoAtual, feitos, cargasPreenchidas());
     cancelarConfirmacao();
     renderTreino();
   };
@@ -373,6 +519,7 @@
     }
     // Reiniciar significa que o treino recomeçou: o registro do dia sai junto.
     setMarcados(hoje, planoAtual.id, treinoAtual.key, {});
+    setCargas(hoje, planoAtual.id, treinoAtual.key, {});
     removerRegistro(hoje, planoAtual.id, treinoAtual.key);
     cancelarConfirmacao();
     renderTreino();
