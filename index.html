@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Treino da Jennifer</title>
+
+<meta name="theme-color" content="#1F3329">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Treino">
+<link rel="apple-touch-icon" href="./icons/icon-180.png">
+<link rel="icon" href="./icons/icon-192.png">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+
+<main>
+  <!-- TELA: TREINO -->
+  <section class="tela" id="tela-treino">
+    <header class="topo">
+      <h1>Treino da Jennifer</h1>
+      <p class="data-hoje" id="data-hoje"></p>
+    </header>
+
+    <div class="planos" id="planos" role="tablist" aria-label="Plano de treino"></div>
+    <div class="tabs" id="tabs" role="tablist" aria-label="Divisão do treino"></div>
+
+    <div class="treino-header">
+      <span class="treino-subtitulo" id="treino-subtitulo"></span>
+      <span class="progresso-contador" id="progresso-contador"></span>
+    </div>
+    <div class="progresso-barra"><div class="progresso-preenchido" id="progresso-preenchido"></div></div>
+
+    <p class="registrado" id="registrado" hidden>Treino registrado hoje</p>
+
+    <div id="lista-exercicios"></div>
+
+    <div class="acoes">
+      <button class="btn-primario" id="btn-finalizar">Finalizar treino</button>
+      <button class="btn-secundario" id="btn-reiniciar">Reiniciar treino de hoje</button>
+    </div>
+  </section>
+
+  <!-- TELA: HISTORICO -->
+  <section class="tela" id="tela-historico" hidden>
+    <header class="topo">
+      <h1>Histórico</h1>
+      <p class="data-hoje" id="semana-intervalo"></p>
+    </header>
+
+    <div class="semana-nav">
+      <button class="btn-semana" id="semana-anterior" aria-label="Semana anterior">&lsaquo;</button>
+      <span class="semana-rotulo" id="semana-rotulo"></span>
+      <button class="btn-semana" id="semana-proxima" aria-label="Próxima semana">&rsaquo;</button>
+    </div>
+
+    <div id="lista-semana"></div>
+
+    <p class="total-semana" id="total-semana"></p>
+  </section>
+</main>
+
+<nav class="nav-inferior">
+  <button class="nav-item ativo" id="nav-treino">Treino</button>
+  <button class="nav-item" id="nav-historico">Histórico</button>
+</nav>
+
+<script src="./data.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>

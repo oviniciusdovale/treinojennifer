@@ -1,0 +1,312 @@
+/* Paleta herdada do protótipo original */
+:root {
+  --fundo: #1F3329;
+  --texto: #F4F1EA;
+  --dourado: #DDBF89;
+  --verde-claro: #7FAE8B;
+  --borda: #2C4436;
+  --borda-forte: #3A4F42;
+  --secundario: #A9BDAE;
+  --apagado: #8CA294;
+  --card-feito: #26392E;
+  --nav-altura: 58px;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html { background: var(--fundo); }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--fundo);
+  color: var(--texto);
+  min-height: 100vh;
+  overscroll-behavior-y: contain;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+main {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: calc(env(safe-area-inset-top) + 20px) 16px
+           calc(env(safe-area-inset-bottom) + var(--nav-altura) + 24px);
+}
+
+.topo { margin-bottom: 20px; }
+
+h1 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+
+.data-hoje {
+  font-size: 13px;
+  color: var(--secundario);
+  margin: 0;
+}
+
+/* Seletor de plano */
+.planos {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.plano {
+  flex: 1;
+  padding: 10px 8px;
+  border-radius: 12px;
+  border: 1px solid var(--borda-forte);
+  background: transparent;
+  color: #C9D6CC;
+  font-family: inherit;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.plano-nome { font-size: 14px; font-weight: 600; display: block; }
+.plano-foco { font-size: 11px; color: var(--secundario); display: block; margin-top: 2px; }
+
+.plano.ativo {
+  background: var(--dourado);
+  border-color: var(--dourado);
+  color: var(--fundo);
+}
+.plano.ativo .plano-foco { color: #4A5C46; }
+
+/* Abas A/B/C */
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.tab {
+  flex: 1;
+  padding: 10px 0;
+  text-align: center;
+  border-radius: 10px;
+  border: 1px solid var(--borda-forte);
+  background: transparent;
+  color: #C9D6CC;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.tab.ativo {
+  background: var(--verde-claro);
+  border-color: var(--verde-claro);
+  color: var(--fundo);
+}
+
+/* Cabeçalho do treino e progresso */
+.treino-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.treino-subtitulo { font-size: 15px; font-weight: 500; }
+.progresso-contador { font-size: 13px; color: var(--secundario); flex-shrink: 0; }
+
+.progresso-barra {
+  height: 6px;
+  background: var(--borda);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.progresso-preenchido {
+  height: 100%;
+  background: var(--verde-claro);
+  width: 0%;
+  transition: width 0.2s ease;
+}
+
+.registrado {
+  font-size: 12px;
+  color: var(--verde-claro);
+  background: var(--card-feito);
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 0 0 12px;
+}
+
+/* Cards de exercício */
+.exercicio {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--borda);
+  margin-bottom: 8px;
+  background: transparent;
+  width: 100%;
+  font-family: inherit;
+  text-align: left;
+  color: inherit;
+}
+
+.exercicio.feito { background: var(--card-feito); }
+
+.checkbox {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid #55705F;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.exercicio.feito .checkbox {
+  background: var(--verde-claro);
+  border-color: var(--verde-claro);
+}
+
+.checkbox svg { width: 14px; height: 14px; display: none; }
+.exercicio.feito .checkbox svg { display: block; }
+
+.ex-texto { flex: 1; }
+
+.ex-nome { font-size: 14px; color: var(--texto); }
+.exercicio.feito .ex-nome { color: var(--apagado); text-decoration: line-through; }
+
+.ex-alt { font-size: 12px; color: #7C9384; margin-top: 2px; }
+
+.ex-series { font-size: 13px; font-weight: 600; color: var(--dourado); }
+.exercicio.feito .ex-series { color: var(--apagado); }
+
+/* Ações */
+.acoes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn-primario {
+  background: var(--dourado);
+  border: 1px solid var(--dourado);
+  color: var(--fundo);
+  padding: 13px;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.btn-primario:disabled {
+  background: transparent;
+  border-color: var(--borda);
+  color: #5F7566;
+}
+
+.btn-secundario {
+  background: none;
+  border: 1px solid var(--borda-forte);
+  color: #C9D6CC;
+  padding: 11px;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.btn-secundario.confirmando {
+  border-color: #B4785E;
+  color: #E0A184;
+}
+
+/* Histórico */
+.semana-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.btn-semana {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--borda-forte);
+  background: transparent;
+  color: #C9D6CC;
+  font-size: 22px;
+  line-height: 1;
+  font-family: inherit;
+  flex-shrink: 0;
+}
+
+.btn-semana:disabled { color: #43594B; border-color: var(--borda); }
+
+.semana-rotulo { font-size: 14px; font-weight: 500; text-align: center; flex: 1; }
+
+.dia {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--borda);
+  margin-bottom: 8px;
+}
+
+.dia.com-treino { background: var(--card-feito); }
+.dia.hoje { border-color: var(--dourado); }
+
+.dia-nome { font-size: 14px; font-weight: 500; flex-shrink: 0; }
+.dia.hoje .dia-nome { color: var(--dourado); }
+
+.dia-treinos { font-size: 13px; color: var(--secundario); text-align: right; }
+.dia-treinos.vazio { color: #5F7566; }
+.dia-treino-linha + .dia-treino-linha { margin-top: 4px; }
+.dia-treino-parcial { color: #7C9384; font-size: 12px; }
+
+.total-semana {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dourado);
+  text-align: center;
+  margin-top: 20px;
+}
+
+/* Navegação inferior */
+.nav-inferior {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  background: #1A2B22;
+  border-top: 1px solid var(--borda);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.nav-item { max-width: 240px; }
+
+.nav-item {
+  flex: 1;
+  height: var(--nav-altura);
+  background: none;
+  border: none;
+  color: var(--secundario);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.nav-item.ativo { color: var(--dourado); }
