@@ -43,8 +43,9 @@ URL final: <https://oviniciusdovale.github.io/treinojennifer/>
 Todos os caminhos do projeto são relativos (`./`) justamente porque o app não fica na
 raiz do domínio, e sim em `/treinojennifer/`.
 
-**Ao publicar uma mudança**, subir o número da versão em `sw.js` (`CACHE = "treino-v1"`).
-Sem isso o celular continua servindo a versão antiga do cache.
+**Ao publicar uma mudança**, subir o número da versão em `sw.js` (`CACHE = "treino-v7"`).
+Sem isso o celular continua servindo a versão antiga do cache. Com a versão nova, o app
+detecta a troca e se recarrega sozinho, então ela não precisa fazer nada.
 
 ## Instalar no iPhone
 

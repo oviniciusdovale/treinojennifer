@@ -577,6 +577,18 @@
   mostrarTela("treino");
 
   if ("serviceWorker" in navigator) {
+    // Com cache primeiro, uma versao nova so apareceria na abertura seguinte.
+    // Quando o service worker novo assume, recarrega uma vez para ela ja abrir
+    // na versao atual. So vale quando a pagina ja estava sob controle de um
+    // service worker: na primeira visita isso seria um recarregamento a toa.
+    if (navigator.serviceWorker.controller) {
+      var recarregando = false;
+      navigator.serviceWorker.addEventListener("controllerchange", function () {
+        if (recarregando) return;
+        recarregando = true;
+        location.reload();
+      });
+    }
     window.addEventListener("load", function () {
       navigator.serviceWorker.register("./sw.js").catch(function () {
         // Sem service worker o app ainda funciona, só perde o modo offline.
